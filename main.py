@@ -1,4 +1,5 @@
 from src.download import download_and_unzip_kaggle_dataset
+from src.visualize import create_plots
 from src.process import process
 
 def main():
@@ -10,6 +11,7 @@ def main():
   df = process('datasets/cybersecurity-suspicious-web-threat-interactions/CloudWatch_Traffic_Web_Attack.csv')
   
   # Visualize the Data
+  create_plots(df)
   
 
 if __name__ == '__main__':
