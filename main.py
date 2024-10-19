@@ -1,14 +1,14 @@
-
+from src.download import download_and_unzip_kaggle_dataset
 
 def main():
 
   # Download the Data
+  download_and_unzip_kaggle_dataset('jancsg/cybersecurity-suspicious-web-threat-interactions')
 
   # Import and Organize the Data
 
   # Visualize the Data
   
-  pass
 
 if __name__ == '__main__':
   
