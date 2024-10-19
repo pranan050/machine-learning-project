@@ -12,6 +12,14 @@ def main():
   
   # Visualize the Data
   create_plots(df)
+
+  # Splitting the data
+
+  # Training the Models
+
+  # Quantifying Results
+
+  # Visualizing Results
   
 
 if __name__ == '__main__':
