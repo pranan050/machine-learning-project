@@ -1,5 +1,5 @@
 from src.download import download_and_unzip_kaggle_dataset
-
+from src.process import process
 def main():
 
   # Download the Data
