@@ -3,6 +3,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+def create_plots(df):
+
+    save_bytes_histogram(df)
+    save_traffic_over_time(df)
+    save_detection_types_pie(df)
+    save_traffic_by_source(df)
+    save_correlation_heatmap(df)
+
 # Ensure the plots folder exists
 def ensure_plots_folder():
     if not os.path.exists('plots'):
