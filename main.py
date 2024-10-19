@@ -7,7 +7,8 @@ def main():
   download_and_unzip_kaggle_dataset('jancsg/cybersecurity-suspicious-web-threat-interactions')
   
   # Import and Organize the Data
-  process('datasets/cybersecurity-suspicious-web-threat-interactions/CloudWatch_Traffic_Web_Attack.csv')
+  df = process('datasets/cybersecurity-suspicious-web-threat-interactions/CloudWatch_Traffic_Web_Attack.csv')
+  
   # Visualize the Data
   
 
