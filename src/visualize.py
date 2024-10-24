@@ -123,6 +123,75 @@ def save_traffic_with_rolling_avg(df):
     plt.savefig('plots/traffic_with_rolling_avg.png')
     plt.close()
 
+# Distribution of Traffic by Source Types
+def save_traffic_by_source_type(df):
+    ensure_plots_folder()
+    traffic_by_type = df.groupby('source.type').agg({'bytes_in': 'sum', 'bytes_out': 'sum'}).reset_index()
+    
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='source.type', y='bytes_in', data=traffic_by_type, color='blue', label='Bytes In')
+    sns.barplot(x='source.type', y='bytes_out', data=traffic_by_type, color='red', label='Bytes Out', bottom=traffic_by_type['bytes_in'])
+    
+    plt.title('Traffic by Source Type')
+    plt.xlabel('Source Type')
+    plt.ylabel('Total Bytes')
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('plots/traffic_by_source_type.png')
+    plt.close()
+
+# Time Series Plot with Anomalies Highlighted
+def save_traffic_with_anomalies(df):
+    ensure_plots_folder()
+    df['time'] = pd.to_datetime(df['time'])
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['time'], df['bytes_in'], color='blue', label='Bytes In')
+    plt.plot(df['time'], df['bytes_out'], color='red', label='Bytes Out')
+
+    # Assuming 'anomaly' column where 1 = anomaly, 0 = normal
+    anomalies = df[df['anomaly'] == 1]
+    plt.scatter(anomalies['time'], anomalies['bytes_in'], color='green', label='Anomalies', marker='x', s=100)
+
+    plt.title('Traffic Over Time with Anomalies')
+    plt.xlabel('Time')
+    plt.ylabel('Bytes')
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('plots/traffic_with_anomalies.png')
+    plt.close()
+
+# Bar Plot of Top 10 Sources by Total Traffic
+def save_top_10_sources(df):
+    ensure_plots_folder()
+    df['total_bytes'] = df['bytes_in'] + df['bytes_out']
+    top_10_sources = df.groupby('source.name').agg({'total_bytes': 'sum'}).nlargest(10, 'total_bytes').reset_index()
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='source.name', y='total_bytes', data=top_10_sources, palette='Blues_d')
+    plt.title('Top 10 Sources by Total Traffic')
+    plt.xlabel('Source Name')
+    plt.ylabel('Total Bytes')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('plots/top_10_sources.png')
+    plt.close()
+
+# Pairplot for numeric columns
+def save_pairplot(df):
+    ensure_plots_folder()
+    numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+    
+    plt.figure(figsize=(10, 8))
+    sns.pairplot(df[numeric_cols], diag_kind='kde')
+    plt.suptitle('Pairplot of Numeric Columns', y=1.02)
+    plt.savefig('plots/pairplot_numeric_columns.png')
+    plt.close()
+
+
+
 
 
 
