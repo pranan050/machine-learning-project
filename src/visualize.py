@@ -84,3 +84,45 @@ def save_correlation_heatmap(df):
     plt.title('Correlation Heatmap')
     plt.savefig('plots/correlation_heatmap.png')
     plt.close()
+
+
+# Boxplot for Bytes In and Out (New)
+def save_bytes_boxplot(df):
+    ensure_plots_folder()
+    plt.figure(figsize=(10, 6))
+    
+    sns.boxplot(data=df[['bytes_in', 'bytes_out']], palette="Set3")
+    
+    plt.title('Boxplot of Bytes In and Bytes Out')
+    plt.ylabel('Bytes')
+    plt.tight_layout()
+    plt.savefig('plots/bytes_boxplot.png')
+    plt.close()
+
+# Time Series Plot with Rolling Averages
+def save_traffic_with_rolling_avg(df):
+    ensure_plots_folder()
+    df['time'] = pd.to_datetime(df['time'])
+    df['rolling_in'] = df['bytes_in'].rolling(window=60).mean()  # 1-hour window example
+    df['rolling_out'] = df['bytes_out'].rolling(window=60).mean()
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['time'], df['bytes_in'], color='blue', alpha=0.5, label='Bytes In')
+    plt.plot(df['time'], df['bytes_out'], color='red', alpha=0.5, label='Bytes Out')
+    
+    # Adding rolling averages
+    plt.plot(df['time'], df['rolling_in'], color='blue', label='Rolling Avg Bytes In', linewidth=2)
+    plt.plot(df['time'], df['rolling_out'], color='red', label='Rolling Avg Bytes Out', linewidth=2)
+    
+    plt.title('Traffic Over Time with Rolling Averages')
+    plt.xlabel('Time')
+    plt.ylabel('Bytes')
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('plots/traffic_with_rolling_avg.png')
+    plt.close()
+
+
+
+
