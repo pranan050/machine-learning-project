@@ -12,8 +12,7 @@ def main():
   
   # Visualize the Data
   create_plots(df)
-  save_bytes_boxplot(df)
-  ensure_plots_folder(df)
+ 
   # Splitting the data
 
   # Training the Models
