@@ -11,7 +11,7 @@ def create_plots(df):
     save_traffic_by_source(df)
     save_correlation_heatmap(df)
     save_bytes_boxplot(df)
-    save_ensure_plots_folder(df)
+    
 
 # Ensure the plots folder exists
 def ensure_plots_folder():
