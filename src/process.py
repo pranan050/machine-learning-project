@@ -27,9 +27,13 @@ def process_data_for_model(df):
         df['end_time'] = pd.to_datetime(df['end_time'], errors='coerce')
         df['duration_seconds'] = (df['end_time'] - df['creation_time']).dt.total_seconds()
     else:
-        # If the duration column cannot be created, set a placeholder value (e.g., median or fixed value)
         print("Duration calculation skipped: 'creation_time' or 'end_time' column not found.")
         df['duration_seconds'] = 0  # Placeholder value; update this if other relevant information is available
+
+    # Check if 'src_ip_country_code' exists
+    if 'src_ip_country_code' not in df.columns:
+        print("'src_ip_country_code' column not found. Filling with a default value.")
+        df['src_ip_country_code'] = 'UNKNOWN'
 
     # Define features and target variable
     features = ['bytes_in', 'bytes_out', 'duration_seconds', 'src_ip_country_code']
