@@ -38,3 +38,30 @@ def preprocess_data(file_path):
     
     # Return the preprocessed DataFrame
     return df
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+def process_data_for_model(df):
+    # Step 1: Define the features and labels
+    # We will use 'bytes_in', 'bytes_out', and 'duration_seconds' as the features
+    # and 'detection_types' as the label (assuming it contains information about suspicious activity)
+    
+    # Create a binary label for whether the detection type is suspicious
+    df['is_suspicious'] = (df['detection_types'] == 'waf_rule').astype(int)
+    
+    # Select the features and target variable
+    X = df[['bytes_in', 'bytes_out', 'duration_seconds']]  # Example of selected numeric features
+    y = df['is_suspicious']  # The target variable
+    
+    # Step 2: Split the data into training and test sets (70% train, 30% test)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    
+    # Step 3: Scale the features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Return the processed training and test data
+    return X_train_scaled, X_test_scaled, y_train, y_test
