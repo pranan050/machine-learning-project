@@ -1,67 +1,60 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-
-def preprocess_data(file_path):
-    # Step 1: Load the dataset
-    df = pd.read_csv(file_path)
-    
-    # Step 2: Remove duplicate rows
-    df = df.drop_duplicates()
-    
-    # Step 3: Convert time-related columns to datetime format
-    df['creation_time'] = pd.to_datetime(df['creation_time'])
-    df['end_time'] = pd.to_datetime(df['end_time'])
-    df['time'] = pd.to_datetime(df['time'])
-    
-    # Step 4: Standardize text data (e.g., ensure country codes are uppercase)
-    df['src_ip_country_code'] = df['src_ip_country_code'].str.upper()
-    
-    # Step 5: Feature engineering - Calculate duration of connection
-    df['duration_seconds'] = (df['end_time'] - df['creation_time']).dt.total_seconds()
-    
-    # Step 6: Scaling numeric features
-    scaler = StandardScaler()
-    numeric_features = ['bytes_in', 'bytes_out', 'duration_seconds']
-    df[numeric_features] = scaler.fit_transform(df[numeric_features])
-    
-    # Step 7: One-Hot Encoding for categorical data (e.g., src_ip_country_code)
-    encoder = OneHotEncoder(sparse=False)
-    encoded_features = encoder.fit_transform(df[['src_ip_country_code']])
-    encoded_columns = encoder.get_feature_names_out(['src_ip_country_code'])
-    encoded_df = pd.DataFrame(encoded_features, columns=encoded_columns, index=df.index)
-    
-    # Step 8: Concatenate encoded features back into the original dataframe
-    df = pd.concat([df, encoded_df], axis=1)
-    
-    # Step 9: Drop original columns that are no longer needed (e.g., src_ip_country_code)
-    df = df.drop(columns=['src_ip_country_code', 'end_time'])  # Drop columns as needed
-    
-    # Return the preprocessed DataFrame
-    return df
-
-import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 
 def process_data_for_model(df):
-    # Step 1: Define the features and labels
-    # We will use 'bytes_in', 'bytes_out', and 'duration_seconds' as the features
-    # and 'detection_types' as the label (assuming it contains information about suspicious activity)
+    """
+    Processes the DataFrame for machine learning model training.
     
-    # Create a binary label for whether the detection type is suspicious
-    df['is_suspicious'] = (df['detection_types'] == 'waf_rule').astype(int)
+    Steps:
+    - Feature engineering (e.g., duration calculation)
+    - Scaling numeric features
+    - Encoding categorical features
+    - Splitting the data into training and test sets
+
+    Args:
+        df (pd.DataFrame): The preprocessed DataFrame.
+
+    Returns:
+        X_train, X_test, y_train, y_test: Train and test splits for features and target.
+    """
+
+    # Feature Engineering: Calculate duration of the connection in seconds
+    df['duration_seconds'] = (df['end_time'] - df['creation_time']).dt.total_seconds()
     
-    # Select the features and target variable
-    X = df[['bytes_in', 'bytes_out', 'duration_seconds']]  # Example of selected numeric features
-    y = df['is_suspicious']  # The target variable
+    # Define features and target variable
+    features = ['bytes_in', 'bytes_out', 'duration_seconds', 'src_ip_country_code']
+    target = 'detection_types'
     
-    # Step 2: Split the data into training and test sets (70% train, 30% test)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    # Select relevant columns
+    X = df[features]
+    y = (df[target] == 'waf_rule').astype(int)  # Convert target to binary (1 for 'waf_rule', 0 otherwise)
     
-    # Step 3: Scale the features
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    # Define a ColumnTransformer for processing numeric and categorical features
+    numeric_features = ['bytes_in', 'bytes_out', 'duration_seconds']
+    categorical_features = ['src_ip_country_code']
+
+    numeric_transformer = StandardScaler()
+    categorical_transformer = OneHotEncoder(sparse=False, handle_unknown='ignore')
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, numeric_features),
+            ('cat', categorical_transformer, categorical_features)
+        ]
+    )
     
-    # Return the processed training and test data
-    return X_train_scaled, X_test_scaled, y_train, y_test
+    # Create a pipeline that first transforms the data and then applies the preprocessor
+    pipeline = Pipeline(steps=[
+        ('preprocessor', preprocessor)
+    ])
+    
+    # Fit and transform the data
+    X_processed = pipeline.fit_transform(X)
+    
+    # Split the data into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.3, random_state=42)
+    
+    return X_train, X_test, y_train, y_test
